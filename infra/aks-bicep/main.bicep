@@ -175,12 +175,12 @@ module fw 'modules/azfw.bicep' = {
     location: location
     fwName: fwName
     fwSubnetId: vnet.outputs.fwSubnetId
-    fwConfig: {
-      applicationRuleCollections: applicationRuleCollections
-      networkRuleCollections: networkRuleCollections
-    }
+    applicationRuleCollections: applicationRuleCollections
+    networkRuleCollections: networkRuleCollections
   }
 }
+
+
 module aks 'modules/aks-cluster.bicep' = {
   name: aksClusterName
   dependsOn: [
