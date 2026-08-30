@@ -14,7 +14,7 @@
 name: Build and Deploy Application
 env:
   DEPLOYMENT_NAME: "petclinicaks"
-  DEPLOYMENT_REGION: "eastus"
+  DEPLOYMENT_REGION: "eastus2"
   RESOURCE_GROUP: "petclinicaks-rg"
   ACR_NAME: "petclinicaksacr23"
   CLUSTER_NAME: "aks-cluster"
