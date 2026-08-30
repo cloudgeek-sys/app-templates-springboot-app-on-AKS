@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.24.24.22086",
+      "templateHash": "16354752469958792640"
+    }
+  },
+  "parameters": {
+    "aksClusterName": {
+      "type": "string"
+    },
+    "subnetId": {
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser"
+    },
+    "adminPublicKey": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "aksSettings": {
+      "type": "object",
+      "defaultValue": {
+        "kubernetesVersion": null,
+        "networkPlugin": "azure",
+        "networkPolicy": "calico",
+        "serviceCidr": "172.16.0.0/22",
+        "dnsServiceIP": "172.16.0.10",
+        "dockerBridgeCidr": "172.16.4.1/22",
+        "outboundType": "UDR",
+        "loadBalancerSku": "standard",
+        "sku_tier": "Paid",
+        "enableRBAC": true,
+        "aadProfileManaged": true,
+        "adminGroupObjectIDs": []
+      }
+    },
+    "defaultNodePool": {
+      "type": "object",
+      "defaultValue": {
+        "name": "systempool01",
+        "count": 3,
+        "vmSize": "Standard_D2s_v3",
+        "osDiskSizeGB": 50,
+        "osDiskType": "Ephemeral",
+        "vnetSubnetID": "[parameters('subnetId')]",
+        "osType": "Linux",
+        "maxCount": 6,
+        "minCount": 2,
+        "enableAutoScaling": true,
+        "type": "VirtualMachineScaleSets",
+        "mode": "System",
+        "orchestratorVersion": null
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2021-05-01",
+      "name": "[parameters('aksClusterName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "sku": {
+        "name": "Basic",
+        "tier": "[parameters('aksSettings').sku_tier]"
+      },
+      "properties": {
+        "kubernetesVersion": "[parameters('aksSettings').kubernetesVersion]",
+        "dnsPrefix": "[parameters('aksSettings').clusterName]",
+        "linuxProfile": {
+          "adminUsername": "[parameters('adminUsername')]",
+          "ssh": {
+            "publicKeys": [
+              {
+                "keyData": "[parameters('adminPublicKey')]"
+              }
+            ]
+          }
+        },
+        "networkProfile": {
+          "networkPlugin": "[parameters('aksSettings').networkPlugin]",
+          "networkPolicy": "[parameters('aksSettings').networkPolicy]",
+          "serviceCidr": "[parameters('aksSettings').serviceCidr]",
+          "dnsServiceIP": "[parameters('aksSettings').dnsServiceIP]",
+          "dockerBridgeCidr": "[parameters('aksSettings').dockerBridgeCidr]",
+          "outboundType": "[parameters('aksSettings').outboundType]",
+          "loadBalancerSku": "[parameters('aksSettings').loadBalancerSku]"
+        },
+        "autoUpgradeProfile": {},
+        "agentPoolProfiles": [
+          "[parameters('defaultNodePool')]"
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "identity": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName')), '2021-05-01', 'full').identity.principalId]"
+    }
+  }
+}

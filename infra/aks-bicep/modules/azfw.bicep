@@ -1,6 +1,8 @@
 param fwName string
 param fwSubnetId string
 param location string = 'eastus'
+param applicationRuleCollections array = []
+param networkRuleCollections array = []
 
 resource fw_ip 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: '${fwName}-ip'
@@ -21,6 +23,8 @@ resource fw 'Microsoft.Network/azureFirewalls@2020-11-01' = {
     sku:{
       tier:'Standard'
     }
+    applicationRuleCollections: applicationRuleCollections
+    networkRuleCollections: networkRuleCollections
     ipConfigurations:[
       {
         name: 'ipConfig1'
@@ -34,6 +38,5 @@ resource fw 'Microsoft.Network/azureFirewalls@2020-11-01' = {
         }
       }
     ]
-    
   }
 }
