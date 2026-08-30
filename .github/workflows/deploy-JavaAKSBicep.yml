@@ -13,12 +13,15 @@
 
 name: Build and Deploy Application
 env:
-  DEPLOYMENT_NAME: "petclinicaks-eastus2"
+  DEPLOYMENT_NAME: "petclinicaks"
   DEPLOYMENT_REGION: "eastus2"
-  RESOURCE_GROUP: "petclinicaks-rg"
-  ACR_NAME: "petclinicaksacr23"
-  CLUSTER_NAME: "aks-cluster"
   DEPLOYMENT_SUFFIX: "${{ github.run_id }}"
+  RESOURCE_GROUP: "petclinicaks-rg-${{ github.run_id }}"
+  ACR_NAME: "petclinicaksacr${{ github.run_number }}"
+  CLUSTER_NAME: "aks-cluster-${{ github.run_id }}"
+  VNET_NAME: "vnet-aks-${{ github.run_id }}"
+  VM_NAME: "aks-vm-${{ github.run_id }}"
+  FIREWALL_NAME: "aks-fw-${{ github.run_id }}"
   DB_SERVER_NAME: "petclinicaks-db-${{ github.run_id }}"
 
 on:
@@ -49,8 +52,25 @@ jobs:
         inlineScript: |
           #!/bin/bash
           set -euo pipefail
-          az deployment sub create --name "${{ env.DEPLOYMENT_NAME }}-${{ env.DEPLOYMENT_SUFFIX }}" --template-file ./infra/aks-bicep/main.bicep --parameters ./infra/aks-bicep/parameters.json --location "${{ env.DEPLOYMENT_REGION }}"
-          az postgres server create --resource-group "${{ env.RESOURCE_GROUP }}" --name "${{ env.DB_SERVER_NAME }}" --location "${{ env.DEPLOYMENT_REGION }}" --admin-user petclinicaksadmin --admin-password petclinicAKS123** --sku-name GP_Gen5_2
+          az deployment sub create \
+            --name "${{ env.DEPLOYMENT_NAME }}-${{ env.DEPLOYMENT_SUFFIX }}" \
+            --template-file ./infra/aks-bicep/main.bicep \
+            --parameters ./infra/aks-bicep/parameters.json \
+              rgName="${{ env.RESOURCE_GROUP }}" \
+              location="${{ env.DEPLOYMENT_REGION }}" \
+              vnetName="${{ env.VNET_NAME }}" \
+              vmName="${{ env.VM_NAME }}" \
+              fwName="${{ env.FIREWALL_NAME }}" \
+              acrName="${{ env.ACR_NAME }}" \
+              aksClusterName="${{ env.CLUSTER_NAME }}" \
+            --location "${{ env.DEPLOYMENT_REGION }}"
+          az postgres server create \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --name "${{ env.DB_SERVER_NAME }}" \
+            --location "${{ env.DEPLOYMENT_REGION }}" \
+            --admin-user petclinicaksadmin \
+            --admin-password petclinicAKS123** \
+            --sku-name GP_Gen5_2
 
   build_Java_App: # Build the Java Application 
      runs-on: ubuntu-latest
