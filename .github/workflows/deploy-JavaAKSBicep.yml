@@ -16,7 +16,7 @@ env:
   DEPLOYMENT_NAME: "petclinicaks"
   DEPLOYMENT_REGION: "eastus"
   ACR_NAME: "petclinicaksacr"
-  CLUSTER_NAME: "aks-cluster"
+  CLUSTER_NAME: "aks-clustersri"
 
 on:
   # Triggers the workflow on push events on the main branch
